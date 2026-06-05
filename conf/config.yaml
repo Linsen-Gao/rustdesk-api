@@ -24,10 +24,10 @@ gin:
   trust-proxy: ""
   cors-origins: ""  # comma-separated allowed origins, empty allows all
   # HTTPS/TLS configuration
-  tls-enable: false        # 启用HTTPS
-  tls-cert-file: ""        # TLS证书文件路径，如 /etc/ssl/cert.pem
-  tls-key-file: ""         # TLS私钥文件路径，如 /etc/ssl/key.pem
-  tls-auto-cert: false     # 没有证书文件时自动生成自签名证书
+  tls-enable: true        # 启用HTTPS
+  tls-cert-file: "/Users/xiaogao/Documents/rustdesk/data/tls/server.crt"        # TLS证书文件路径，如 /etc/ssl/cert.pem
+  tls-key-file: "/Users/xiaogao/Documents/rustdesk/data/tls/server.key"         # TLS私钥文件路径，如 /etc/ssl/key.pem
+  tls-auto-cert: true     # 没有证书文件时自动生成自签名证书
 gorm:
   type: "sqlite"
   max-idle-conns: 10

@@ -14,9 +14,8 @@ func Run(g *gin.Engine, addr string) {
 	if global.Config.Gin.TlsEnable {
 		tlsConfig := getTLSConfig()
 		if tlsConfig != nil {
-			server := endless.NewServer(addr, g)
-			server.TLSConfig = tlsConfig
-			server.ListenAndServeTLS("", "")
+			cfg := &global.Config.Gin
+			endless.ListenAndServeTLS(addr, cfg.TlsCertFile, cfg.TlsKeyFile, g)
 			return
 		}
 		global.Logger.Warn("TLS enabled but no valid cert configured, falling back to HTTP")
@@ -27,8 +26,6 @@ func Run(g *gin.Engine, addr string) {
 // getTLSConfig loads or generates TLS configuration
 func getTLSConfig() *tls.Config {
 	cfg := &global.Config.Gin
-
-	// Load existing or auto-generate
 	tlsConfig, err := loadOrGenerateTLS(cfg.TlsCertFile, cfg.TlsKeyFile, cfg.TlsAutoCert)
 	if err != nil {
 		global.Logger.Errorf("Failed to configure TLS: %v", err)

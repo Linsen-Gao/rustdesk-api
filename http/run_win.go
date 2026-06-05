@@ -4,7 +4,6 @@ package http
 
 import (
 	"context"
-	"crypto/tls"
 	"net/http"
 	"os"
 	"os/signal"
@@ -21,16 +20,7 @@ func Run(g *gin.Engine, addr string) {
 		Handler: g,
 	}
 
-	if global.Config.Gin.TlsEnable {
-		tlsConfig := getTLSConfig()
-		if tlsConfig != nil {
-			srv.TLSConfig = tlsConfig
-		} else {
-			global.Logger.Warn("TLS enabled but no valid cert configured, falling back to HTTP")
-		}
-	}
-
-	// Graceful shutdown on Windows
+	// Graceful shutdown
 	go func() {
 		quit := make(chan os.Signal, 1)
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
@@ -41,9 +31,10 @@ func Run(g *gin.Engine, addr string) {
 		srv.Shutdown(ctx)
 	}()
 
-	if srv.TLSConfig != nil {
+	if global.Config.Gin.TlsEnable {
+		cfg := &global.Config.Gin
 		global.Logger.Infof("Starting HTTPS server on %s", addr)
-		srv.ListenAndServeTLS("", "")
+		srv.ListenAndServeTLS(cfg.TlsCertFile, cfg.TlsKeyFile)
 	} else {
 		global.Logger.Infof("Starting HTTP server on %s", addr)
 		srv.ListenAndServe()
