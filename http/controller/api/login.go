@@ -35,6 +35,7 @@ func (l *Login) Login(c *gin.Context) {
 	// 检查登录限制
 	loginLimiter := global.LoginLimiter
 	clientIp := c.ClientIP()
+	_, needCaptcha := loginLimiter.CheckSecurityStatus(clientIp)
 
 	f := &api.LoginForm{}
 	err := c.ShouldBindJSON(f)
@@ -52,6 +53,14 @@ func (l *Login) Login(c *gin.Context) {
 		global.Logger.Warn(fmt.Sprintf("Login Fail: %s %s %s", "ParamsError", c.RemoteIP(), c.ClientIP()))
 		response.Error(c, errList[0])
 		return
+	}
+
+	// 检查是否需要验证码
+	if needCaptcha {
+		if f.CaptchaId == "" || f.Captcha == "" || !loginLimiter.VerifyCaptcha(f.CaptchaId, f.Captcha) {
+			response.Error(c, response.TranslateMsg(c, "CaptchaError"))
+			return
+		}
 	}
 
 	u := service.AllService.UserService.InfoByUsernamePassword(f.Username, f.Password)
@@ -73,6 +82,9 @@ func (l *Login) Login(c *gin.Context) {
 	if ref != "" {
 		f.DeviceInfo.Type = model.LoginLogClientWeb
 	}
+
+	// 登录成功，清除登录限制
+	loginLimiter.RemoveAttempts(clientIp)
 
 	ut := service.AllService.UserService.Login(u, &model.LoginLog{
 		UserId:   u.Id,
@@ -135,7 +147,9 @@ func (l *Login) Logout(c *gin.Context) {
 	u := service.AllService.UserService.CurUser(c)
 	token, ok := c.Get("token")
 	if ok {
-		service.AllService.UserService.Logout(u, token.(string))
+		if t, ok2 := token.(string); ok2 {
+			service.AllService.UserService.Logout(u, t)
+		}
 	}
 	c.JSON(http.StatusOK, nil)
 

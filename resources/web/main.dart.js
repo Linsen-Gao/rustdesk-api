@@ -37535,7 +37535,7 @@ if(!(a instanceof m))return
 s=new A.kn(a)
 m=a.code
 m.toString
-if(a.type==="keydown"&&a.key==="Tab"&&a.isComposing)return
+if(a.type==="keydown"&&a.isComposing)return
 r=a.key
 r.toString
 if(!(r==="Meta"||r==="Shift"||r==="Alt"||r==="Control")&&n.e){r=n.a

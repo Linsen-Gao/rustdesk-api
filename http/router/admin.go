@@ -24,6 +24,7 @@ func Init(g *gin.Engine) {
 	adg.POST("/user/register", (&admin.User{}).Register)
 
 	ConfigBind(adg)
+	TlsBind(adg)
 
 	adg.Use(middleware.BackendUserAuth())
 	//FileBind(adg)
@@ -39,11 +40,6 @@ func Init(g *gin.Engine) {
 	AddressBookCollectionRuleBind(adg)
 	UserTokenBind(adg)
 
-	//deprecated by ConfigBind
-	//rs := &admin.Rustdesk{}
-	//adg.GET("/server-config", rs.ServerConfig)
-	//adg.GET("/app-config", rs.AppConfig)
-	//deprecated end
 
 	ShareRecordBind(adg)
 	MyBind(adg)
@@ -312,6 +308,20 @@ func MyBind(rg *gin.RouterGroup) {
 	}
 }
 
+
+func TlsBind(rg *gin.RouterGroup) {
+	cont := &admin.Tls{}
+	// Status is public
+	rg.GET("/tls/status", cont.Status)
+
+	// These require authentication
+	aR := rg.Group("/tls").Use(middleware.BackendUserAuth())
+	{
+		aR.POST("/upload", cont.UploadCert)
+		aR.POST("/generate", cont.GenerateSelfSigned)
+		aR.POST("/toggle", cont.Toggle)
+	}
+}
 func ShareRecordBind(rg *gin.RouterGroup) {
 	aR := rg.Group("/share_record").Use(middleware.AdminPrivilege())
 	{

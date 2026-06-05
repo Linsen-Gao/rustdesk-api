@@ -62,6 +62,9 @@ func (oci *OauthCacheItem) ToOauthUser() *model.OauthUser {
 
 var OauthCache = &sync.Map{}
 
+// MaxOauthCacheEntries limits the number of OAuth state entries to prevent memory exhaustion.
+const MaxOauthCacheEntries = 1000
+
 const (
 	OauthActionTypeLogin = "login"
 	OauthActionTypeBind  = "bind"
@@ -83,6 +86,16 @@ func (os *OauthService) GetOauthCache(key string) *OauthCacheItem {
 }
 
 func (os *OauthService) SetOauthCache(key string, item *OauthCacheItem, expire uint) {
+	// Enforce capacity limit: count entries before storing
+	count := 0
+	OauthCache.Range(func(_, _ interface{}) bool {
+		count++
+		return count < MaxOauthCacheEntries+1
+	})
+	if count >= MaxOauthCacheEntries {
+		Logger.Warn("OauthCache capacity limit reached, discarding oldest entry")
+		return
+	}
 	OauthCache.Store(key, item)
 	if expire > 0 {
 		time.AfterFunc(time.Duration(expire)*time.Second, func() {

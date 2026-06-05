@@ -215,8 +215,12 @@ func (ct *User) UpdatePassword(c *gin.Context) {
 // @Security token
 func (ct *User) Current(c *gin.Context) {
 	u := service.AllService.UserService.CurUser(c)
-	token, _ := c.Get("token")
-	t := token.(string)
+	token, exists := c.Get("token")
+	t, ok := token.(string)
+	if !ok || !exists {
+		response.Fail(c, 101, response.TranslateMsg(c, "NeedLogin"))
+		return
+	}
 	responseLoginSuccess(c, u, t)
 }
 

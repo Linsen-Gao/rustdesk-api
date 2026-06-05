@@ -195,7 +195,9 @@ func InitGlobal() {
 	}
 
 	//jwt
-	//fmt.Println(global.Config.Jwt.PrivateKey)
+	if len(global.Config.Jwt.Key) == 0 {
+		global.Logger.Fatal("JWT key is not configured. Set jwt.key in config.yaml or RUSTDESK_API_JWT_KEY env var.")
+	}
 	global.Jwt = jwt.NewJwt(global.Config.Jwt.Key, global.Config.Jwt.ExpireDuration)
 	//locker
 	global.Lock = lock.NewLocal()
@@ -310,7 +312,9 @@ func Migrate(version uint) {
 	if err != nil {
 		global.Logger.Error("migrate err :=>", err)
 	}
-	global.DB.Create(&model.Version{Version: version})
+	if err := global.DB.Create(&model.Version{Version: version}).Error; err != nil {
+		global.Logger.Error("Failed to record migration version: ", err)
+	}
 	//如果是初次则创建一个默认用户
 	var vc int64
 	global.DB.Model(&model.Version{}).Count(&vc)
@@ -345,7 +349,7 @@ func Migrate(version uint) {
 
 		// 生成随机密码
 		pwd := utils.RandomString(8)
-		global.Logger.Info("Admin Password Is: ", pwd)
+		global.Logger.Info("Admin account created with a random password")
 		var err error
 		admin.Password, err = utils.EncryptPassword(pwd)
 		if err != nil {

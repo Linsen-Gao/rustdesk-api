@@ -3,6 +3,7 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/lejianwen/rustdesk-api/v2/global"
+	"github.com/lejianwen/rustdesk-api/v2/http/response"
 	"github.com/lejianwen/rustdesk-api/v2/service"
 )
 
@@ -12,16 +13,12 @@ func RustAuth() gin.HandlerFunc {
 		//获取HTTP_AUTHORIZATION
 		token := c.GetHeader("Authorization")
 		if token == "" {
-			c.JSON(401, gin.H{
-				"error": "Unauthorized",
-			})
+			response.Fail(c, response.CodeNeedLogin, response.TranslateMsg(c, "NeedLogin"))
 			c.Abort()
 			return
 		}
 		if len(token) <= 7 {
-			c.JSON(401, gin.H{
-				"error": "Unauthorized",
-			})
+			response.Fail(c, response.CodeNeedLogin, response.TranslateMsg(c, "NeedLogin"))
 			c.Abort()
 			return
 		}
@@ -35,9 +32,7 @@ func RustAuth() gin.HandlerFunc {
 		if len(global.Jwt.Key) > 0 {
 			uid, _ := service.AllService.UserService.VerifyJWT(token)
 			if uid == 0 {
-				c.JSON(401, gin.H{
-					"error": "Unauthorized",
-				})
+				response.Fail(c, response.CodeNeedLogin, response.TranslateMsg(c, "NeedLogin"))
 				c.Abort()
 				return
 			}
@@ -45,16 +40,12 @@ func RustAuth() gin.HandlerFunc {
 
 		user, ut := service.AllService.UserService.InfoByAccessToken(token)
 		if user.Id == 0 {
-			c.JSON(401, gin.H{
-				"error": "Unauthorized",
-			})
+			response.Fail(c, response.CodeNeedLogin, response.TranslateMsg(c, "NeedLogin"))
 			c.Abort()
 			return
 		}
 		if !service.AllService.UserService.CheckUserEnable(user) {
-			c.JSON(401, gin.H{
-				"error": "Unauthorized",
-			})
+			response.Fail(c, response.CodeGeneralError, response.TranslateMsg(c, "UserDisabled"))
 			c.Abort()
 			return
 		}

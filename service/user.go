@@ -87,10 +87,10 @@ func (us *UserService) InfoByAccessToken(token string) (*model.User, *model.User
 
 // GenerateToken 生成token
 func (us *UserService) GenerateToken(u *model.User) string {
-	if len(Jwt.Key) > 0 {
-		return Jwt.GenerateToken(u.Id)
+	if len(Jwt.Key) == 0 {
+		Logger.Fatal("JWT key is not configured. Set jwt.key in config or RUSTDESK_API_JWT_KEY env var.")
 	}
-	return utils.Md5(u.Username + time.Now().String())
+	return Jwt.GenerateToken(u.Id)
 }
 
 // Login 登录

@@ -2,10 +2,21 @@ package response
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/lejianwen/rustdesk-api/v2/global"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
-	"net/http"
+)
+
+// HTTP status codes used consistently across API responses.
+const (
+	CodeSuccess                 = 0
+	CodeGeneralError            = 101
+	CodeCaptchaRequired         = 110
+	CodeNeedLogin               = 401
+	CodeNoAccess                = 403
+	CodeLocked                  = 423
 )
 
 type Response struct {

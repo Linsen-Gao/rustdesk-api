@@ -14,16 +14,12 @@ var startTime = ""
 var once = &sync.Once{}
 
 func (a *AppService) GetAppVersion() string {
-	if version != "" {
-		return version
-	}
 	once.Do(func() {
 		v, err := os.ReadFile("resources/version")
 		if err != nil {
 			return
 		}
 		version = string(v)
-
 	})
 	return version
 }

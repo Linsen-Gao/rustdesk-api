@@ -12,7 +12,7 @@ func AdminPrivilege() gin.HandlerFunc {
 		u := service.AllService.UserService.CurUser(c)
 
 		if !service.AllService.UserService.IsAdmin(u) {
-			response.Fail(c, 403, response.TranslateMsg(c, "NoAccess"))
+			response.Fail(c, response.CodeNoAccess, response.TranslateMsg(c, "NoAccess"))
 			c.Abort()
 			return
 		}

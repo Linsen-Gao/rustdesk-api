@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/lejianwen/rustdesk-api/v2/global"
 	"github.com/lejianwen/rustdesk-api/v2/http/response"
-	"net/http"
 )
 
 func Limiter() gin.HandlerFunc {
@@ -13,7 +12,7 @@ func Limiter() gin.HandlerFunc {
 		clientIp := c.ClientIP()
 		banned, _ := loginLimiter.CheckSecurityStatus(clientIp)
 		if banned {
-			response.Fail(c, http.StatusLocked, response.TranslateMsg(c, "Banned"))
+			response.Fail(c, response.CodeLocked, response.TranslateMsg(c, "Banned"))
 			c.Abort()
 			return
 		}

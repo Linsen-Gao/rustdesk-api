@@ -26,14 +26,6 @@ type Service struct {
 	*AppService
 }
 
-type Dependencies struct {
-	Config *config.Config
-	DB     *gorm.DB
-	Logger *log.Logger
-	Jwt    *jwt.Jwt
-	Lock   *lock.Locker
-}
-
 var Config *config.Config
 var DB *gorm.DB
 var Logger *log.Logger
