@@ -1,0 +1,14 @@
+[Unit]
+Description=RustDesk API Server
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/rustdesk-api
+ExecStart=/opt/rustdesk-api/apimain
+Environment=RUSTDESK_API_JWT_KEY=请替换为你的JWT密钥
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
